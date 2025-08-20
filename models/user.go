@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/CrispyChillies/go_authentication/utils"
 )
 
 type User struct {
@@ -14,7 +14,7 @@ type User struct {
 }
 
 func RegisterUser(db *sql.DB, username, password string) error {
-	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hasedPassword, err := utils.HashPassword(password)
 	if err != nil {
 		return err
 	}
