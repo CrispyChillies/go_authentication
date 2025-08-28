@@ -19,13 +19,15 @@ func init() {
 var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
+	UserID   int    `json:"userID"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(userID int, username string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
+		UserID:   userID,
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
