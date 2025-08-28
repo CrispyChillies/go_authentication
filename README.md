@@ -1,23 +1,22 @@
 # Go Authentication
 
-A secure authentication system built with Go, featuring user registration, login, and password hashing using bcrypt.
+A robust and secure authentication API built with Go, featuring user registration, login, password hashing with bcrypt, and PostgreSQL integration.
 
 ## Features
 
-- 🔐 **Secure Password Hashing**: Uses bcrypt for password encryption
-- 👤 **User Registration**: Create new user accounts
-- 🔑 **User Authentication**: Login with username/password
-- 🗃️ **PostgreSQL Integration**: Robust database storage
-- 🌍 **Environment Configuration**: Secure configuration management
-- 📦 **Modular Architecture**: Clean separation of concerns
+- 🔐 **Password Hashing:** Secure user passwords using bcrypt
+- 👤 **User Registration & Login:** Simple endpoints for account creation and authentication
+- 🗃️ **PostgreSQL Database:** Persistent user storage
+- 🌱 **Environment Variables:** Easy configuration with `.env` and `godotenv`
+- 🧩 **Modular Design:** Clean separation of database, models, and handlers
 
 ## Tech Stack
 
-- **Language**: Go 1.21+
-- **Database**: PostgreSQL
-- **Password Hashing**: bcrypt
-- **Environment Management**: godotenv
-- **Database Driver**: lib/pq
+- **Go** (1.21+)
+- **PostgreSQL**
+- **bcrypt** (`golang.org/x/crypto/bcrypt`)
+- **godotenv** for environment management
+- **lib/pq** PostgreSQL driver
 
 ## Project Structure
 
@@ -25,36 +24,40 @@ A secure authentication system built with Go, featuring user registration, login
 go_authentication/
 ├── main.go              # Application entry point
 ├── db/
-│   └── db.go           # Database connection and initialization
+│   └── db.go            # Database connection logic
 ├── models/
-│   └── user.go         # User model and authentication logic
-├── .env                # Environment variables (not in git)
-├── go.mod              # Go module dependencies
-└── README.md           # Project documentation
+│   └── user.go          # User model and DB operations
+├── handlers/            # HTTP handlers (register, login, etc.)
+├── utils/               # Utility functions (e.g., JWT, password hashing)
+├── .env                 # Environment variables (not committed)
+├── go.mod
+└── README.md
 ```
 
-## Prerequisites
+## Getting Started
+
+### Prerequisites
 
 - Go 1.21 or higher
 - PostgreSQL 12+
 - Git
 
-## Installation
+### Installation
 
-1. **Clone the repository**:
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/CrispyChillies/go_authentication.git
    cd go_authentication
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies:**
 
    ```bash
    go mod tidy
    ```
 
-3. **Set up PostgreSQL database**:
+3. **Set up PostgreSQL:**
 
    ```sql
    CREATE DATABASE go_authentication;
@@ -66,138 +69,86 @@ go_authentication/
    );
    ```
 
-4. **Create environment file**:
+4. **Configure environment variables:**
+   - Copy the example file and edit it:
+     ```bash
+     cp .env.example .env
+     ```
+   - Fill in your `.env` file:
+     ```env
+     DB_HOST=localhost
+     DB_PORT=5432
+     DB_USER=postgres
+     DB_PASSWORD=your_password
+     DB_NAME=go_authentication
+     DB_SSLMODE=disable
+     JWT_SECRET=your_jwt_secret_key_here
+     ```
 
-   ```bash
-   cp .env.example .env
-   ```
+### Running the Application
 
-5. **Configure environment variables** in `.env`:
-   ```env
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=your_password
-   DB_NAME=go_authentication
-   DB_SSLMODE=disable
-   ```
-
-## Usage
-
-### Development
-
-Run the application in development mode:
+**Development:**
 
 ```bash
 go run main.go
 ```
 
-### Production
-
-Build and run the application:
+**Production:**
 
 ```bash
-# Build
 go build -o go_authentication main.go
-
-# Run
 ./go_authentication
 ```
 
-### Using Make (Optional)
-
-If you have a Makefile:
+**With Makefile (optional):**
 
 ```bash
 make run    # Run in development
 make build  # Build for production
 ```
 
-## API Examples
+## API Endpoints
 
-### User Registration
-
-The current implementation demonstrates user registration:
-
-```go
-// Register a new user
-err := models.RegisterUser(db.DB, "username", "password")
-if err != nil {
-    log.Fatal("Registration failed:", err)
-}
-```
+- `POST /register` — Register a new user
+- `POST /login` — Authenticate and receive a JWT
+- `GET /api/profile` — Get user profile (JWT required)
 
 ## Environment Variables
 
-| Variable      | Description       | Default             |
-| ------------- | ----------------- | ------------------- |
-| `DB_HOST`     | PostgreSQL host   | `localhost`         |
-| `DB_PORT`     | PostgreSQL port   | `5432`              |
-| `DB_USER`     | Database username | `postgres`          |
-| `DB_PASSWORD` | Database password | _required_          |
-| `DB_NAME`     | Database name     | `go_authentication` |
-| `DB_SSLMODE`  | SSL mode          | `disable`           |
+| Variable    | Description        | Example/Default     |
+| ----------- | ------------------ | ------------------- |
+| DB_HOST     | PostgreSQL host    | localhost           |
+| DB_PORT     | PostgreSQL port    | 5432                |
+| DB_USER     | Database username  | postgres            |
+| DB_PASSWORD | Database password  | your_password       |
+| DB_NAME     | Database name      | go_authentication   |
+| DB_SSLMODE  | SSL mode           | disable             |
+| JWT_SECRET  | JWT signing secret | (generate securely) |
 
-## Security Features
+## Security
 
-- **Password Hashing**: All passwords are hashed using bcrypt with default cost
-- **SQL Injection Protection**: Uses parameterized queries
-- **Environment Variables**: Sensitive data stored in environment variables
-- **Password Exclusion**: Passwords excluded from JSON responses
-
-## Development
-
-### Adding New Features
-
-1. **Database Models**: Add new models in `models/` directory
-2. **Database Migrations**: Update database schema as needed
-3. **Environment Config**: Add new variables to `.env` and `db.InitDB()`
-
-### Code Structure
-
-- **`main.go`**: Application bootstrap and dependency injection
-- **`db/db.go`**: Database connection and configuration
-- **`models/user.go`**: User-related database operations and business logic
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Passwords are hashed with bcrypt before storage
+- SQL queries use parameterization to prevent injection
+- JWT secret is loaded from environment variables
+- Passwords are never returned in API responses
 
 ## Troubleshooting
 
-### Common Issues
+- **Database connection errors:** Check your `.env` values and ensure PostgreSQL is running.
+- **Dependencies:** Run `go mod tidy` if you see missing package errors.
+- **Environment not loading:** Ensure `.env` is in the project root and properly formatted.
 
-1. **Database Connection Failed**:
+## Contributing
 
-   - Ensure PostgreSQL is running
-   - Verify credentials in `.env` file
-   - Check if database exists
+1. Fork the repo
+2. Create a feature branch
+3. Commit and push your changes
+4. Open a Pull Request
 
-2. **Missing Dependencies**:
+## License
 
-   ```bash
-   go mod tidy
-   ```
-
-3. **Environment Variables Not Loading**:
-   - Ensure `.env` file is in project root
-   - Check file permissions
-   - Verify no trailing spaces in `.env`
-
-### Getting Help
-
-- Open an issue on GitHub
-- Check the Go documentation: https://golang.org/doc/
-- PostgreSQL documentation: https://www.postgresql.org/docs/
+MIT License
 
 ---
 
-**Note**: This is a learning project demonstrating Go authentication concepts. For production use, consider additional security measures like JWT tokens, rate limiting, and comprehensive input validation.
+**Note:** This project is for educational purposes. For production, implement additional security such as HTTPS, JWT expiration, refresh tokens, and input validation.
